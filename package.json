@@ -1,0 +1,30 @@
+{
+  "name": "wxproxy",
+  "version": "1.0.0",
+  "description": "An Aviation weather proxy for JSON payloads ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidfekke/wxproxy.git"
+  },
+  "keywords": [
+    "METAR",
+    "JSON",
+    "TAF"
+  ],
+  "author": "David Fekke <david@fekke.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/davidfekke/wxproxy/issues"
+  },
+  "homepage": "https://github.com/davidfekke/wxproxy#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.3",
+    "fast-xml-parser": "^3.12.5"
+  }
+}
