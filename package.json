@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "An Aviation weather proxy for JSON payloads ",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,6 +27,8 @@
     "axios": "^0.18.0",
     "cors": "^2.8.5",
     "express": "^4.16.3",
-    "fast-xml-parser": "^3.12.5"
+    "fast-xml-parser": "^3.12.5",
+    "fastify": "^3.15.0",
+    "fastify-cors": "^5.2.0"
   }
 }
