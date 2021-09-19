@@ -23,8 +23,18 @@ let parseroptions = {
 fastify.get('/metar/:icaoidentifier', async (request, reply) => {
     const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString=${request.params.icaoidentifier}&hoursBeforeNow=2`);
     const json = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
-    console.log(`json.num_results ${json.response.data.num_results}`)
-    return json.response.data.METAR;
+    console.log(`json.num_results ${json.response.data.num_results}`);
+    if (json.response.data.num_results === '0') {
+        reply
+            .code(404)
+            .header('Content-Type', 'application/json; charset=utf-8')
+            .send({});
+    } else {
+        reply
+            .code(200)
+            .header('Content-Type', 'application/json; charset=utf-8')
+            .send(json.response.data.METAR);
+    }
 });
 
 fastify.get('/taf/:icaoidentifier', async (request, reply) => {
