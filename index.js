@@ -30,10 +30,7 @@ fastify.get('/metar/:icaoidentifier', async (request, reply) => {
             .header('Content-Type', 'application/json; charset=utf-8')
             .send({});
     } else {
-        reply
-            .code(200)
-            .header('Content-Type', 'application/json; charset=utf-8')
-            .send(json.response.data.METAR);
+        return json.response.data.METAR;
     }
 });
 
