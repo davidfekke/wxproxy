@@ -1,8 +1,6 @@
 import Fastify from 'fastify';
 import fastifyCors from 'fastify-cors';
 import axios from 'axios';
-//import * as parser from 'fast-xml-parser';
-//import * as parser from 'fastify-xml-body-parser';
 import xml2js from 'xml2js';
 
 const fastify = Fastify({ logger: true });
@@ -18,6 +16,18 @@ fastify.register(fastifyCors, {
 let parseroptions = {
     parseNodeValue: true,
     parseAttributeValue: true
+}
+
+function convertChildObjectToArray(jsonObj) {
+    const tafArray = jsonObj.TAF;
+    for (let taf of tafArray) {
+        for (let forecast of taf.forecast) {
+            if (!Array.isArray(forecast.sky_condition)) {
+                forecast.sky_condition = [forecast.sky_condition];
+            }
+        }
+    }
+    return tafArray; 
 }
 
 fastify.get('/metar/:icaoidentifier', async (request, reply) => {
@@ -47,7 +57,9 @@ fastify.get('/metar/:icaoidentifier', async (request, reply) => {
 fastify.get('/taf/:icaoidentifier', async (request, reply) => {
     const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=tafs&requestType=retrieve&format=xml&stationString=${request.params.icaoidentifier}&hoursBeforeNow=4`);
     const jsonObj = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
-    return jsonObj.response.data.TAF;
+
+    const json = convertChildObjectToArray(jsonObj.response.data);
+    return json;
 });
 
 const start = async () => {
