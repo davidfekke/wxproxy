@@ -30,6 +30,16 @@ function convertChildObjectToArray(jsonObj) {
     return tafArray; 
 }
 
+function convertMetarChildObjectToArray(result) {
+    const metarArray = result;
+    for (let metar of metarArray) {
+        if (!Array.isArray(metar.sky_condition)) {
+            metar.sky_condition = [metar.sky_condition];
+        }
+    }
+    return metarArray; 
+}
+
 fastify.get('/metar/:icaoidentifier', async (request, reply) => {
     const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString=${request.params.icaoidentifier}&hoursBeforeNow=2`);
     const json = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
@@ -47,10 +57,11 @@ fastify.get('/metar/:icaoidentifier', async (request, reply) => {
         } else {
             result.push(json.response.data.METAR);
         }
+        let metarArray = convertMetarChildObjectToArray(result);
         reply
             .code(200)
             .header('Content-Type', 'application/json; charset=utf-8')
-            .send(result);
+            .send(metarArray);
     }
 });
 
