@@ -70,7 +70,11 @@ fastify.get('/taf/:icaoidentifier', async (request, reply) => {
     const jsonObj = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
 
     const json = convertChildObjectToArray(jsonObj.response.data);
-    return json;
+    reply
+        .code(200)
+        .header('Content-Type', 'application/json; charset=utf-8')
+        .send(json);
+    // return json;
 });
 
 const start = async () => {
