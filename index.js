@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import fastifyCors from 'fastify-cors';
 import axios from 'axios';
 import xml2js from 'xml2js';
+import fs from 'fs';
 
 const fastify = Fastify({ logger: true });
 
@@ -76,6 +77,15 @@ fastify.get('/taf/:icaoidentifier', async (request, reply) => {
         .send(json);
     // return json;
 });
+
+fastify.get('/reportingstations', async (request, reply) => {
+    const data = await fs.promises.readFile('metarlist.json', 'utf8');
+    const stations = JSON.parse(data);
+    reply
+        .code(200)
+        .header('Content-Type', 'application/json; charset=utf-8')
+        .send(stations);
+})
 
 const start = async () => {
     try {
