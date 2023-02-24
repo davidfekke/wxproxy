@@ -85,7 +85,25 @@ fastify.get('/reportingstations', async (request, reply) => {
         .code(200)
         .header('Content-Type', 'application/json; charset=utf-8')
         .send(stations);
-})
+});
+
+fastify.get('/reportingstations/:lat/:long/:limit', async (request, reply) => {
+    const data = await fs.promises.readFile('metarlist.json', 'utf8');
+    const raw_stations = JSON.parse(data);
+    const lat = request.params.lat;
+    const long = request.params.long;
+    const limit = request.params.limit ?? 10;
+    const stations = sortByClosest(raw_stations, {
+        latitude: lat,
+        longitude: long
+    }).splice(0, limit);
+    reply
+        .code(200)
+        .header('Content-Type', 'application/json; charset=utf-8')
+        .send(stations);
+});
+
+// get closest reporting stations
 
 const start = async () => {
     try {
@@ -96,3 +114,47 @@ const start = async () => {
     }
 }
 start();
+
+/*
+Latitude
+30.33218	
+Longitude
+-81.65565
+*/
+
+function getDistanceFromLatLonInMiles(lat1, lon1, lat2, lon2) {
+    const R = 3959; // Radius of the earth in miles
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in miles
+    return distance;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+  
+function sortByClosest(locations, targetLocation) {
+    return locations.sort((a, b) => {
+        const distA = getDistanceFromLatLonInMiles(
+            a.lat,
+            a.long,
+            targetLocation.latitude,
+            targetLocation.longitude
+        );
+        const distB = getDistanceFromLatLonInMiles(
+            b.lat,
+            b.long,
+            targetLocation.latitude,
+            targetLocation.longitude
+        );
+        return distA - distB;
+    });
+}
+  
