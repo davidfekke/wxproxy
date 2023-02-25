@@ -10,7 +10,7 @@ lines.forEach((line, index) => {
         const regoin = line.substring(0, 2);
         //console.log(regoin);
         // 3 - 19 Name
-        const airport = line.substring(3, 9);
+        const station = line.substring(3, 9);
         //console.log(airport.toLocaleLowerCase());
         // 20 - 24 ICAO Idenifier
         const identifier = line.substring(20, 24);
@@ -30,7 +30,7 @@ lines.forEach((line, index) => {
         //console.log('');
         const object = {
             "region": regoin,
-            "city": formatName(airport),
+            "station": formatName(station),
             "identifier": identifier,
             "lat": convertLatNLongIntoGeocode(lat),
             "long": convertLatNLongIntoGeocode(long),

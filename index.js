@@ -5,7 +5,6 @@ import axios from 'axios';
 import xml2js from 'xml2js';
 import fs from 'fs';
 
-
 // Define your GraphQL schema
 const schema = `
   type Metar {
@@ -54,10 +53,21 @@ const schema = `
     cloud_base_ft_agl: Int
   }
 
+  type ReportingStations {
+    region: String!
+    station: String!
+    identifier: String!
+    lat: Float!
+    long: Float!
+    elevation: Int!
+    country_code: String!
+  }
+
   type Query {
     add(x: Int, y: Int): Int
     getMetar(id: String!): [Metar!]!
     getTaf(id: String!): [Taf!]!
+    getReportingStations(lat: Float!, long: Float!, limit: Int!): [ReportingStations!]!
   }
 `
 
@@ -83,6 +93,15 @@ const resolvers = {
         const jsonObj = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
         const json = convertChildObjectToArray(jsonObj.response.data);
         return json;
+    },
+    getReportingStations: async (_, { lat, long, limit }) => {
+        const data = await fs.promises.readFile('metarlist.json', 'utf8');
+        const raw_stations = JSON.parse(data);
+        const stations = sortByClosest(raw_stations, {
+            latitude: lat,
+            longitude: long
+        }).splice(0, limit);
+        return stations;
     }
   }
 }
