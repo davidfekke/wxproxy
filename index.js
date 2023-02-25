@@ -1,12 +1,104 @@
 import Fastify from 'fastify';
-import fastifyCors from 'fastify-cors';
+import fastifyCors from '@fastify/cors';
+import mercurius from 'mercurius';
 import axios from 'axios';
 import xml2js from 'xml2js';
 import fs from 'fs';
 
+
+// Define your GraphQL schema
+const schema = `
+  type Metar {
+    raw_text: String!
+    station_id: String
+    observation_time: String!
+    latitude: Float!
+    longitude: Float!
+    temp_c: Float!
+    dewpoint_c: Float!
+    wind_dir_degrees: Int!
+    wind_speed_kt: Float!
+    visibility_statute_mi: Float
+    altim_in_hg: Float!
+    sea_level_pressure_mb: Float
+    flight_category: String
+    sky_condition: [SkyCondition!]!
+  }
+
+  type Taf {
+    raw_text: String!
+    station_id: String!
+    issue_time: String!
+    bulletin_time: String!
+    valid_time_from: String!
+    valid_time_to: String!
+    latitude: Float!
+    longitude: Float!
+    elevation_m: Float!
+    forecast: [Forecast!]!
+  }
+
+  type Forecast {
+    fcst_time_from: String!
+    fcst_time_to: String!
+    change_indicator: String!
+    wind_dir_degrees: Int
+    wind_speed_kt: Int
+    visibility_statute_mi: Float
+    wx_string: String
+    sky_condition: [SkyCondition!]
+  }
+
+  type SkyCondition {
+    sky_cover: String!
+    cloud_base_ft_agl: Int
+  }
+
+  type Query {
+    add(x: Int, y: Int): Int
+    getMetar(id: String!): [Metar!]!
+    getTaf(id: String!): [Taf!]!
+  }
+`
+
+const resolvers = {
+  Query: {
+    add: async (_, { x, y }) => {
+        return x + y;
+    },
+    getMetar: async (_, { id }) => {
+        const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=2`);
+        const json = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
+        let result = [];
+        if (Array.isArray(json.response.data.METAR)) {
+            result = json.response.data.METAR;
+        } else {
+            result.push(json.response.data.METAR);
+        }
+        let metarArray = convertMetarChildObjectToArray(result);
+        return metarArray;
+    },
+    getTaf: async (_, { id }) => {
+        const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=tafs&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=4`);
+        const jsonObj = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
+        const json = convertChildObjectToArray(jsonObj.response.data);
+        return json;
+    }
+  }
+}
+
+// Create an instance of ApolloServer
+
+
 const fastify = Fastify({ logger: true });
 
 const port = process.env.PORT || '3000';
+
+fastify.register(mercurius, {
+    schema,
+    resolvers,
+    graphiql: true
+})
 
 fastify.register(fastifyCors, { 
     // put your options here
@@ -40,6 +132,11 @@ function convertMetarChildObjectToArray(result) {
     }
     return metarArray; 
 }
+
+fastify.get('/', async function (req, reply) {
+    const query = '{ add(x: 2, y: 2) }'
+    return reply.graphql(query)
+});
 
 fastify.get('/metar/:icaoidentifier', async (request, reply) => {
     const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString=${request.params.icaoidentifier}&hoursBeforeNow=2`);
