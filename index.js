@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import mercurius from 'mercurius';
 import schema from './schema.js';
+import { printSchema } from 'graphql';
 import { getReportingStationsData, getAllReportingStationsData, getMetarData, getTafData } from './datasource.js';
 
 const resolvers = {
@@ -35,10 +36,14 @@ fastify.register(fastifyCors, {
     // put your options here
 });
 
-// let parseroptions = {
-//     parseNodeValue: true,
-//     parseAttributeValue: true
-// }
+// Define a route to retrieve the SDL
+fastify.post('/schema', (req, reply) => {
+    reply.type('text/plain').send(schema);
+});
+
+fastify.get('/schema', (req, reply) => {
+    reply.type('text/plain').send(schema);
+});
 
 fastify.get('/metar/:icaoidentifier', async (request, reply) => {
     const id = request.params.icaoidentifier;
