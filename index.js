@@ -2,8 +2,7 @@ import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import mercurius from 'mercurius';
 import schema from './schema.js';
-import { printSchema } from 'graphql';
-import { getReportingStationsData, getAllReportingStationsData, getMetarData, getTafData } from './datasource.js';
+import { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData } from './datasource.js';
 
 const resolvers = {
   Query: {

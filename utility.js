@@ -21,13 +21,13 @@ function sortByClosest(locations, targetLocation) {
     return locations.sort((a, b) => {
         const distA = getDistanceFromLatLonInMiles(
             a.lat,
-            a.long,
+            a.lon,
             targetLocation.latitude,
             targetLocation.longitude
         );
         const distB = getDistanceFromLatLonInMiles(
             b.lat,
-            b.long,
+            b.lon,
             targetLocation.latitude,
             targetLocation.longitude
         );

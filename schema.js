@@ -47,13 +47,13 @@ const schema = `
   }
 
   type ReportingStations {
-    region: String!
-    station: String!
-    identifier: String!
+    state: String!
+    site: String!
+    icaoId: String!
     lat: Float!
-    long: Float!
-    elevation: Int!
-    country_code: String!
+    lon: Float!
+    elev: Int!
+    country: String!
   }
 
   type Query {

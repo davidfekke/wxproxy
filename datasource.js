@@ -4,7 +4,7 @@ import fs from 'fs';
 import { convertMetarChildObjectToArray, convertChildObjectToArray, sortByClosest } from './utility.js';
 
 async function getMetarData(id) {
-    const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=2`);
+    const xml = await axios.get(`https://www.aviationweather.gov/api/data/dataserver?dataSource=metars&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=2`);
     const json = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
     let result = [];
     if (json.response.data.num_results === '0') {
@@ -19,14 +19,14 @@ async function getMetarData(id) {
 }
 
 async function getTafData(id) {
-    const xml = await axios.get(`https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=tafs&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=4`);
+    const xml = await axios.get(`https://www.aviationweather.gov/api/data/dataserver?dataSource=tafs&requestType=retrieve&format=xml&stationString=${id}&hoursBeforeNow=4`);
     const jsonObj = await xml2js.parseStringPromise(xml.data, { explicitArray: false, mergeAttrs: true });
     const json = convertChildObjectToArray(jsonObj.response.data);
     return json;
 }
 
 async function getReportingStationsData(lat, long, limit) {
-    const data = await fs.promises.readFile('metarlist.json', 'utf8');
+    const data = await fs.promises.readFile('stations.cache.json', 'utf8');
     const raw_stations = JSON.parse(data);
     const stations = sortByClosest(raw_stations, {
         latitude: lat,
@@ -36,7 +36,7 @@ async function getReportingStationsData(lat, long, limit) {
 }
 
 async function getAllReportingStationsData() {
-    const data = await fs.promises.readFile('metarlist.json', 'utf8');
+    const data = await fs.promises.readFile('stations.cache.json', 'utf8');
     const stations = JSON.parse(data);
     return stations;
 }
