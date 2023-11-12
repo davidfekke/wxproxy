@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "updatenames": "node updateairportnames.js",
-    "createreportingstations": "node parseposdelimitedmetars.js",
+    "createreportingstations": "node downloadmetarstations.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
