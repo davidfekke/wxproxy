@@ -10,7 +10,7 @@ const schema = `
     dewpoint_c: Float!
     wind_dir_degrees: Int!
     wind_speed_kt: Float!
-    visibility_statute_mi: Float
+    visibility_statute_mi: String!
     altim_in_hg: Float!
     sea_level_pressure_mb: Float
     flight_category: String
@@ -34,9 +34,9 @@ const schema = `
     fcst_time_from: String!
     fcst_time_to: String!
     change_indicator: String!
-    wind_dir_degrees: Int
+    wind_dir_degrees: String
     wind_speed_kt: Int
-    visibility_statute_mi: Float
+    visibility_statute_mi: String!
     wx_string: String
     sky_condition: [SkyCondition!]
   }
