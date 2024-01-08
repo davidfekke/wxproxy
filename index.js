@@ -131,9 +131,9 @@ fastify.get('/metar/:icaoidentifier',
 fastify.get('/taf/:icaoidentifier', 
     {
         schema: {
-            description: 'Retrieve METAR data for a given station',
-            tags: ['METAR'],
-            summary: 'Returns METAR information for the specified ICAO station identifier',
+            description: 'Retrieve TAF data for a given station',
+            tags: ['TAF'],
+            summary: 'Returns TAF information for the specified ICAO station identifier',
             params: {
                 type: 'object',
                 properties: {
@@ -158,23 +158,26 @@ fastify.get('/taf/:icaoidentifier',
                             longitude: { type: 'string' },
                             elevation_m: { type: 'string' },
                             forecast: {
-                                type: 'object',
-                                properties: {
-                                    fcst_time_from: { type: 'string' },
-                                    fcst_time_to: { type: 'string' },
-                                    change_indicator: { type: 'string' },
-                                    wind_dir_degrees: { type: 'string' },
-                                    wind_speed_kt: { type: 'string' },
-                                    wind_gust_kt: { type: 'string' },
-                                    visibility_statute_mi: { type: 'string' },
-                                    wx_string: { type: 'string' },
-                                    sky_condition: {
-                                        type: 'array',
-                                        items: {
-                                            type: 'object',
-                                            properties: {
-                                                sky_cover: { type: 'string' },
-                                                cloud_base_ft_agl: { type: 'string' }
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        fcst_time_from: { type: 'string' },
+                                        fcst_time_to: { type: 'string' },
+                                        change_indicator: { type: 'string' },
+                                        wind_dir_degrees: { type: 'string' },
+                                        wind_speed_kt: { type: 'string' },
+                                        wind_gust_kt: { type: 'string' },
+                                        visibility_statute_mi: { type: 'string' },
+                                        wx_string: { type: 'string' },
+                                        sky_condition: {
+                                            type: 'array',
+                                            items: {
+                                                type: 'object',
+                                                properties: {
+                                                    sky_cover: { type: 'string' },
+                                                    cloud_base_ft_agl: { type: 'string' }
+                                                }
                                             }
                                         }
                                     }
@@ -196,23 +199,90 @@ fastify.get('/taf/:icaoidentifier',
             .send(json);
 });
 
-fastify.get('/reportingstations', async (request, reply) => {
-    const stations = await getAllReportingStationsData();
-    reply
-        .code(200)
-        .header('Content-Type', 'application/json; charset=utf-8')
-        .send(stations);
+fastify.get('/reportingstations', {
+        schema: {
+            description: 'This returns a list of all of the aviation reporting stations',
+            tags: ['REPORTING_STATION'],
+            summary: 'This returns a list of all of the aviation reporting stations with a specified ICAO station identifier',
+            response: {
+                200: {
+                    description: 'Successful response',
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            icaoId: { type: 'string' },
+                            iataId: { type: 'string' },
+                            faaId: { type: 'string' },
+                            wmoId: { type: 'string' },
+                            lat: { type: 'string' },
+                            lon: { type: 'string' },
+                            elev: { type: 'integer' },
+                            site: { type: 'string' },
+                            state: { type: 'string' },
+                            country: { type: 'string' },
+                            priority:  { type: 'integer' }
+                        }
+                    }
+                }
+            }
+        }
+    }, 
+    async (request, reply) => {
+        const stations = await getAllReportingStationsData();
+        reply
+            .code(200)
+            .header('Content-Type', 'application/json; charset=utf-8')
+            .send(stations);
 });
 
-fastify.get('/reportingstations/:lat/:long/:limit', async (request, reply) => {
-    const lat = request.params.lat;
-    const long = request.params.long;
-    const limit = request.params.limit ?? 10;
-    const stations = await getReportingStationsData(lat, long, limit);
-    reply
-        .code(200)
-        .header('Content-Type', 'application/json; charset=utf-8')
-        .send(stations);
+fastify.get('/reportingstations/:lat/:long/:limit', {
+        schema: {
+            description: 'This returns a list of aviation reporting stations',
+            tags: ['REPORTING_STATION'],
+            summary: 'This returns a list of the aviation reporting stations with a specified ICAO station identifier based on being nearest to latitude and longitude with a default limit of the 10 closest stations',
+            params: {
+                type: 'object',
+                properties: {
+                    lat: { type: 'string' },
+                    long: { type: 'string' },
+                    limit: { type: 'integer' }
+                },
+                required: ['lat', 'long']
+            },
+            response: {
+                200: {
+                    description: 'Successful response',
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            icaoId: { type: 'string' },
+                            iataId: { type: 'string' },
+                            faaId: { type: 'string' },
+                            wmoId: { type: 'string' },
+                            lat: { type: 'string' },
+                            lon: { type: 'string' },
+                            elev: { type: 'integer' },
+                            site: { type: 'string' },
+                            state: { type: 'string' },
+                            country: { type: 'string' },
+                            priority:  { type: 'integer' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    async (request, reply) => {
+        const lat = request.params.lat;
+        const long = request.params.long;
+        const limit = request.params.limit ?? 10;
+        const stations = await getReportingStationsData(lat, long, limit);
+        reply
+            .code(200)
+            .header('Content-Type', 'application/json; charset=utf-8')
+            .send(stations);
 });
 
 // get closest reporting stations
