@@ -289,7 +289,10 @@ fastify.get('/reportingstations/:lat/:long/:limit', {
 
 const start = async () => {
     try {
-        await fastify.listen({ port });
+        await fastify.listen({ 
+            port: port, 
+            host: '0.0.0.0' 
+        });
         fastify.swagger();
     } catch(err) {
         fastify.log.error(err);
