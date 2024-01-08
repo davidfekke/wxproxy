@@ -3,6 +3,10 @@ import fastifyCors from '@fastify/cors';
 import mercurius from 'mercurius';
 import schema from './schema.js';
 import { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData } from './datasource.js';
+import { fastifySwagger } from '@fastify/swagger';
+import { fastifySwaggerUi } from '@fastify/swagger-ui';
+import swaggerConfig from './swaggerConfig.js';
+import swaggerUIConfig from './swaggerUIConfig.js';
 
 const resolvers = {
   Query: {
@@ -29,7 +33,10 @@ fastify.register(mercurius, {
     schema,
     resolvers,
     graphiql: true
-})
+});
+
+await fastify.register(fastifySwagger, swaggerConfig);
+await fastify.register(fastifySwaggerUi, swaggerUIConfig);
 
 fastify.register(fastifyCors, { 
     // put your options here
@@ -44,7 +51,67 @@ fastify.get('/schema', (req, reply) => {
     reply.type('text/plain').send(schema);
 });
 
-fastify.get('/metar/:icaoidentifier', async (request, reply) => {
+fastify.get('/metar/:icaoidentifier', 
+    {
+        schema: {
+            description: 'Retrieve METAR data for a given station',
+            tags: ['METAR'],
+            summary: 'Returns METAR information for the specified ICAO station identifier',
+            params: {
+            type: 'object',
+            properties: {
+                icaoidentifier: {
+                type: 'string',
+                description: 'ICAO Station Identifier'
+                }
+            },
+            required: ['icaoidentifier']
+            },
+            response: {
+            200: {
+                description: 'Successful response',
+                type: 'array',
+                items: {
+                type: 'object',
+                properties: {
+                    raw_text: { type: 'string' },
+                    station_id: { type: 'string' },
+                    observation_time: { type: 'string', format: 'date-time' },
+                    latitude: { type: 'string' },
+                    longitude: { type: 'string' },
+                    temp_c: { type: 'string' },
+                    dewpoint_c: { type: 'string' },
+                    wind_dir_degrees: { type: 'string' },
+                    wind_speed_kt: { type: 'string' },
+                    visibility_statute_mi: { type: 'string' },
+                    altim_in_hg: { type: 'string' },
+                    sea_level_pressure_mb: { type: 'string' },
+                    quality_control_flags: {
+                    type: 'object',
+                    properties: {
+                        auto_station: { type: 'string' }
+                    }
+                    },
+                    sky_condition: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                        sky_cover: { type: 'string' }
+                        }
+                    }
+                    },
+                    flight_category: { type: 'string' },
+                    metar_type: { type: 'string' },
+                    elevation_m: { type: 'string' },
+                    // Add other fields if they are consistently present in the response
+                }
+                }
+            }
+            }
+        }
+    },
+    async (request, reply) => {
     const id = request.params.icaoidentifier;
     const metarArray = await getMetarData(id);
     
@@ -61,14 +128,72 @@ fastify.get('/metar/:icaoidentifier', async (request, reply) => {
     }
 });
 
-fastify.get('/taf/:icaoidentifier', async (request, reply) => {
-    const id = request.params.icaoidentifier;
-    const json = await getTafData(id);
+fastify.get('/taf/:icaoidentifier', 
+    {
+        schema: {
+            description: 'Retrieve METAR data for a given station',
+            tags: ['METAR'],
+            summary: 'Returns METAR information for the specified ICAO station identifier',
+            params: {
+                type: 'object',
+                properties: {
+                    icaoidentifier: { type: 'string' }
+                },
+                required: ['icaoidentifier']
+            },
+            response: {
+                200: {
+                    description: 'Successful response',
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            raw_text: { type: 'string' },
+                            station_id: { type: 'string' },
+                            issue_time: { type: 'string' },
+                            bulletin_time: { type: 'string' },
+                            valid_time_from: { type: 'string' },
+                            valid_time_to: { type: 'string' },
+                            latitude: { type: 'string' },
+                            longitude: { type: 'string' },
+                            elevation_m: { type: 'string' },
+                            forecast: {
+                                type: 'object',
+                                properties: {
+                                    fcst_time_from: { type: 'string' },
+                                    fcst_time_to: { type: 'string' },
+                                    change_indicator: { type: 'string' },
+                                    wind_dir_degrees: { type: 'string' },
+                                    wind_speed_kt: { type: 'string' },
+                                    wind_gust_kt: { type: 'string' },
+                                    visibility_statute_mi: { type: 'string' },
+                                    wx_string: { type: 'string' },
+                                    sky_condition: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'object',
+                                            properties: {
+                                                sky_cover: { type: 'string' },
+                                                cloud_base_ft_agl: { type: 'string' }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    async (request, reply) => {
+        const id = request.params.icaoidentifier;
+        const json = await getTafData(id);
 
-    reply
-        .code(200)
-        .header('Content-Type', 'application/json; charset=utf-8')
-        .send(json);
+        reply
+            .code(200)
+            .header('Content-Type', 'application/json; charset=utf-8')
+            .send(json);
 });
 
 fastify.get('/reportingstations', async (request, reply) => {
@@ -94,11 +219,11 @@ fastify.get('/reportingstations/:lat/:long/:limit', async (request, reply) => {
 
 const start = async () => {
     try {
-        await fastify.listen(port, '0.0.0.0');
+        await fastify.listen({ port });
+        fastify.swagger();
     } catch(err) {
         fastify.log.error(err);
         process.exit(1);
     }
 }
 start();
-  
