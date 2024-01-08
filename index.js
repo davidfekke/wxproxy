@@ -57,6 +57,7 @@ fastify.get('/metar/:icaoidentifier',
             description: 'Retrieve METAR data for a given station',
             tags: ['METAR'],
             summary: 'Returns METAR information for the specified ICAO station identifier',
+            operationId: 'metar',
             params: {
             type: 'object',
             properties: {
@@ -131,9 +132,10 @@ fastify.get('/metar/:icaoidentifier',
 fastify.get('/taf/:icaoidentifier', 
     {
         schema: {
-            description: 'Retrieve TAF data for a given station',
+            description: 'Retrieve TAF (terminal area forecast) data for a given station',
             tags: ['TAF'],
-            summary: 'Returns TAF information for the specified ICAO station identifier',
+            summary: 'Returns TAF (terminal area forecast) information for the specified ICAO station identifier',
+            operationId: 'taf',
             params: {
                 type: 'object',
                 properties: {
@@ -204,6 +206,7 @@ fastify.get('/reportingstations', {
             description: 'This returns a list of all of the aviation reporting stations',
             tags: ['REPORTING_STATION'],
             summary: 'This returns a list of all of the aviation reporting stations with a specified ICAO station identifier',
+            operationId: 'reportingstations',
             response: {
                 200: {
                     description: 'Successful response',
@@ -241,6 +244,7 @@ fastify.get('/reportingstations/:lat/:long/:limit', {
             description: 'This returns a list of aviation reporting stations',
             tags: ['REPORTING_STATION'],
             summary: 'This returns a list of the aviation reporting stations with a specified ICAO station identifier based on being nearest to latitude and longitude with a default limit of the 10 closest stations',
+            operationId: 'reportingstations-lat-long',
             params: {
                 type: 'object',
                 properties: {
