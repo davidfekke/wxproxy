@@ -1,6 +1,6 @@
 {
   "name": "wxproxy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An Aviation weather proxy for JSON payloads ",
   "main": "index.js",
   "type": "module",
@@ -39,5 +39,8 @@
     "graphql": "^16.6.0",
     "mercurius": "^12.2.0",
     "xml2js": "^0.4.23"
+  },
+  "engines": {
+    "node": "20.10.0"
   }
 }
