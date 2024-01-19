@@ -98,7 +98,8 @@ fastify.get('/metar/:icaoidentifier',
                     items: {
                         type: 'object',
                         properties: {
-                        sky_cover: { type: 'string' }
+                            sky_cover: { type: 'string' },
+                            cloud_base_ft_agl: { type: 'string' }
                         }
                     }
                     },
