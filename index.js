@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import mercurius from 'mercurius';
 import schema from './schema.js';
-import { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData } from './datasource.js';
+import { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData, getForecastDiscussion } from './datasource.js';
 import { fastifySwagger } from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
 import swaggerConfig from './swaggerConfig.js';
@@ -288,6 +288,35 @@ fastify.get('/reportingstations/:lat/:long/:limit', {
             .code(200)
             .header('Content-Type', 'application/json; charset=utf-8')
             .send(stations);
+});
+
+fastify.get('/forecastdiscussion/:cwa', {
+    schema: {
+        description: 'This returns the forecast discussion for a given CWA',
+        tags: ['FORECAST_DISCUSSION'],
+        summary: 'This returns the forecast discussion for a given CWA',
+        operationId: 'forecastdiscussion',
+        params: {
+            type: 'object',
+            properties: {
+                cwa: { type: 'string' }
+            },
+            required: ['cwa']
+        },
+        response: {
+            200: {
+                description: 'Successful response',
+                type: 'string'
+            }
+        }
+    }
+}, async (request, reply) => {
+    const cwa = request.params.cwa;
+    const fullText = await getForecastDiscussion(cwa);
+    reply
+        .code(200)
+        .header('Content-Type', 'text/plain; charset=utf-8')
+        .send(fullText);
 });
 
 // get closest reporting stations

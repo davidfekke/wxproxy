@@ -35,10 +35,16 @@ async function getReportingStationsData(lat, long, limit) {
     return stations;
 }
 
+async function getForecastDiscussion(cwa) {
+    const fullText = await axios.get(`https://aviationweather.gov/api/data/fcstdisc?cwa=${cwa}&type=af`);
+    console.log(fullText.data);
+    return fullText.data;
+}
+
 async function getAllReportingStationsData() {
     const data = await fs.promises.readFile('stations.cache.json', 'utf8');
     const stations = JSON.parse(data);
     return stations;
 }
 
-export { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData };
+export { getMetarData, getTafData, getReportingStationsData, getAllReportingStationsData, getForecastDiscussion };
