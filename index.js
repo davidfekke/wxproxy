@@ -94,14 +94,15 @@ fastify.get('/metar/:icaoidentifier',
                     }
                     },
                     sky_condition: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            sky_cover: { type: 'string' },
-                            cloud_base_ft_agl: { type: 'string' }
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            nullable: true,
+                            properties: {
+                                sky_cover: { type: 'string' },
+                                cloud_base_ft_agl: { type: 'string' }
+                            }
                         }
-                    }
                     },
                     flight_category: { type: 'string' },
                     metar_type: { type: 'string' },
@@ -177,9 +178,10 @@ fastify.get('/taf/:icaoidentifier',
                                             type: 'array',
                                             items: {
                                                 type: 'object',
+                                                nullable: true,
                                                 properties: {
                                                     sky_cover: { type: 'string' },
-                                                    cloud_base_ft_agl: { type: 'string' }
+                                                    cloud_base_ft_agl: { type: 'string', nullable: true }
                                                 }
                                             }
                                         }
@@ -195,7 +197,18 @@ fastify.get('/taf/:icaoidentifier',
     async (request, reply) => {
         const id = request.params.icaoidentifier;
         const json = await getTafData(id);
-
+        
+        // Clean undefined values from sky_condition arrays
+        for (let item of json) {
+            if (item.forecast) {
+                for (let forecast of item.forecast) {
+                    if (forecast.sky_condition && Array.isArray(forecast.sky_condition)) {
+                        forecast.sky_condition = forecast.sky_condition.filter(sc => sc !== undefined && sc !== null);
+                    }
+                }
+            }
+        }
+        
         reply
             .code(200)
             .header('Content-Type', 'application/json; charset=utf-8')
