@@ -32,7 +32,7 @@
     "@fastify/swagger-ui": "^2.0.1",
     "axios": "^1.13.5",
     "cors": "^2.8.5",
-    "express": "^4.16.3",
+    "express": "^4.22.1",
     "fast-xml-parser": "^5.3.7",
     "fastify": "^5.7.3",
     "fastify-xml-body-parser": "^2.2.0",
