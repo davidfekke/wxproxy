@@ -3,7 +3,6 @@ name: Create main branch
 on:
   push:
     branches:
-      - copilot/create-main-branch
       - master
   workflow_dispatch:
 
@@ -18,27 +17,31 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const branches = await github.rest.git.listMatchingRefs({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'heads/main'
-            });
-
-            if (branches.data.length === 0) {
-              const masterRef = await github.rest.git.getRef({
+            try {
+              const branches = await github.rest.git.listMatchingRefs({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: 'heads/master'
+                ref: 'heads/main'
               });
 
-              await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: 'refs/heads/main',
-                sha: masterRef.data.object.sha
-              });
+              if (branches.data.length === 0) {
+                const masterRef = await github.rest.git.getRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: 'heads/master'
+                });
 
-              console.log(`Created main branch from master at ${masterRef.data.object.sha}`);
-            } else {
-              console.log('main branch already exists, skipping creation');
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: 'refs/heads/main',
+                  sha: masterRef.data.object.sha
+                });
+
+                console.log(`Created main branch from master at ${masterRef.data.object.sha}`);
+              } else {
+                console.log('main branch already exists, skipping creation');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to create main branch: ${error.message}`);
             }
