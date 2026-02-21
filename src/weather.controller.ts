@@ -60,7 +60,7 @@ export class WeatherController {
     @Param('long') long: string,
     @Param('limit') limit: string,
   ) {
-    return this.weatherService.getReportingStations(Number(lat), Number(long), Number(limit ?? '10'));
+    return this.weatherService.getReportingStations(Number(lat), Number(long), Number(limit) || 10);
   }
 
   @ApiOperation({ summary: 'Retrieve forecast discussion by CWA' })

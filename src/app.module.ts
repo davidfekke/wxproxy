@@ -13,7 +13,6 @@ import { WeatherService } from './weather.service.js';
       typeDefs: schema,
       path: '/graphql',
       graphiql: true,
-      playground: false,
     }),
   ],
   controllers: [WeatherController],
