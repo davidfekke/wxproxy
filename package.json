@@ -34,7 +34,7 @@
     "cors": "^2.8.5",
     "express": "^4.22.1",
     "fast-xml-parser": "^5.3.7",
-    "fastify": "^5.7.3",
+    "fastify": "^5.8.1",
     "fastify-xml-body-parser": "^2.2.0",
     "graphql": "^16.6.0",
     "mercurius": "^16.7.0",
